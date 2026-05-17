@@ -141,5 +141,47 @@ router.post('/ai/interview', async (req, res) => {
         res.status(500).json({ error: "Failed to generate interview questions", details: error.message });
     }
 });
+// 6. AI Chatbot Assistant [POST /api/ai/chat]
+router.post('/ai/chat', async (req, res) => {
+    try {
+        const { message } = req.body;
+        
+        // Fetch all candidates from the database to give the AI context
+        const candidates = await Candidate.find(); 
+
+        const promptContent = `
+            You are a helpful HR assistant for the 'Jobanalysis' platform.
+            Here is the current database of candidates:
+            ${candidates.map(c => `- ${c.name}: ${c.experience} years exp, Skills: ${c.skills.join(', ')}`).join('\n')}
+            
+            Answer the following user query based ONLY on the candidate data provided above. Be concise and professional.
+            User Query: "${message}"
+        `;
+
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "openai/gpt-3.5-turbo", 
+                messages: [
+                    { role: "system", content: "You are an HR Assistant." },
+                    { role: "user", content: promptContent }
+                ]
+            })
+        });
+
+        const data = await response.json();
+        
+        res.status(200).json({ 
+            reply: data.choices[0].message.content 
+        });
+
+    } catch (error) {
+        res.status(500).json({ error: "Chatbot failed", details: error.message });
+    }
+});
 
 module.exports = router;
