@@ -25,7 +25,7 @@ function App() {
     e.preventDefault();
     try {
       const skillsArray = skills.split(',').map(skill => skill.trim());
-      await axios.post('http://localhost:5000/api/candidates', {
+      await axios.post('https://candidate-api-1tki.onrender.com/api/candidates', {
         name, email, skills: skillsArray, experience: Number(experience)
       });
       setStatusMessage('✅ Candidate added successfully!');
@@ -49,7 +49,7 @@ function App() {
       const skillsArray = jobSkills.split(',').map(skill => skill.trim());
 
       // 1. Fetch Basic Matching Logic (Scores)
-      const matchResponse = await axios.post('http://localhost:5000/api/match', {
+      const matchResponse = await axios.post('https://candidate-api-1tki.onrender.com/api/match', {
         requiredSkills: skillsArray,
         minExperience: Number(jobExp)
       });
@@ -59,7 +59,7 @@ function App() {
 
       // 2. Fetch OpenRouter AI Explanation (If candidates exist)
       if (matchedCandidates.length > 0) {
-        const aiResponse = await axios.post('http://localhost:5000/api/ai/shortlist', {
+        const aiResponse = await axios.post('https://candidate-api-1tki.onrender.com/api/ai/shortlist', {
           requiredSkills: skillsArray,
           minExperience: Number(jobExp),
           candidates: matchedCandidates
@@ -85,7 +85,7 @@ function App() {
     try {
       const skillsArray = jobSkills.split(',').map(skill => skill.trim());
       
-      const response = await axios.post('http://localhost:5000/api/ai/interview', {
+      const response = await axios.post('https://candidate-api-1tki.onrender.com/api/ai/interview', {
         candidateName: candidate.name,
         skills: candidate.skills,
         jobRole: skillsArray
